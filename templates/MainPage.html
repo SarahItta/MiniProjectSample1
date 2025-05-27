@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>NoteStack</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            font-family: 'Poppins', sans-serif;
+            height: 100%;
+            background: linear-gradient(to bottom, #fce4ec, #f50087);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .main-container {
+            background-image: url('{{ url_for('static', filename='download.jpg') }}');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: top right;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        nav {
+            display: flex;
+            justify-content: flex-end;
+            align-items: end;
+            padding: 20px 40px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links li a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            font-size: 1.3rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links li a:hover {
+            color: #ffe6f0;
+        }
+
+        .name {
+            font-family: 'Abril Fatface', serif;
+            font-size: 100px;
+            margin-top: 120px;
+        }
+
+        .tagline {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 500;
+            margin-top: -10px;
+            letter-spacing: 10.5px;
+            line-height: 1.6;
+        }
+
+        .title-container {
+            width: fit-content;
+            padding-left: 100px;
+            max-width: 800px;
+        }
+
+        .highlight {
+            margin-top: 10px;
+            padding-left: 100px;
+            font-size: 30px;
+            font-family: 'Barlow Semi Condensed', sans-serif;
+            font-weight: 700;
+        }
+
+        .description {
+            padding-left: 100px;
+            font-family: 'Nunito Sans', sans-serif;
+            font-size: 20px;
+            max-width: 1200px;
+            margin-top: 10px;
+        }
+
+        .welcome-user {
+            padding-left: 100px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .generate-notes-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 50px;
+        }
+
+        .generate-notes-btn {
+            background-color: white;
+            color: #f50087;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Poppins', sans-serif;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .generate-notes-btn:hover {
+            background-color: #f50087;
+            color: white;
+        }
+
+        .hero-section {
+            margin-top: -50px;
+        }
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: black;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
+            z-index: 1;
+            border-radius: 5px;
+            right: -50px;
+        }
+        .dropdown-content a {
+            color: #000000;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            font-size: 1rem;
+        }
+        .dropdown-content a:hover {
+            background-color: #f50087;
+            color: black;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        /* Thin scrollbar for WebKit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;               /* For vertical scrollbar */
+            height: 8px;              /* For horizontal scrollbar */
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;  /* Optional: background of the track */
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.4);  /* Scrollbar color */
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <header>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="{{ url_for('mainpage') }}">Home</a></li>
+                    <li><a href="{{ url_for('view_notes') }}">Notes</a></li>
+                    <li><a href="{{ url_for('view_flashcards') }}">FlashCards</a></li>
+                    <li><a href="{{ url_for('quiz') }}">Quiz</a></li>
+                    {% if 'user_id' in session %}
+                        <li class="dropdown">
+                            <a href="#" class="dropbtn">Profile</a>
+                            <div class="dropdown-content">
+                                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                                <a href="{{ url_for('logout') }}">Logout</a>
+                            </div>
+                        </li>
+                    {% else %}
+                        <li><a href="{{ url_for('login') }}">Login</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </header>
+
+        <section class="hero-section">
+            <div class="title-container">
+                <div class="name">NoteStack</div>
+                <h1 class="tagline">Note it. Stack it. Master it.</h1>
+            </div>
+
+            <p class="description">
+                NoteStack is your AI-powered study companion that turns text or PDFs into clear,
+                customizable notes—whether you want concise summaries or detailed explanations.
+                Reinforce your learning with flashcards, test your knowledge through quizzes, and
+                easily save or download your notes.
+            </p>
+
+            <p class="highlight">Stack your knowledge and master it—one note at a time.</p>
+
+            {% if 'user_id' in session %}
+                <p class="welcome-user">Welcome, {{ username }}!</p>
+                <div class="generate-notes-container">
+                    <a href="{{ url_for('generate_notes') }}" class="generate-notes-btn">Generate Notes</a>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</body>
+</html>

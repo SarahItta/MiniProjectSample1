@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NoteStack - Generate Notes</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@700&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .main-container {
+        background-image: url('{{ url_for('static', filename='download.jpg') }}');
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: top right;
+        background-attachment: fixed; /* Add this line */
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: flex-end;
+      padding: 20px 40px;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 25px;
+    }
+
+    .nav-links li a {
+      text-decoration: none;
+      color: white;
+      font-weight: 500;
+      font-size: 1.3rem;
+      transition: color 0.3s;
+    }
+
+    .nav-links li a:hover {
+      color: #ffe6f0;
+    }
+
+    .content-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .title {
+      font-family: 'Abril Fatface', serif;
+      font-size: 3rem;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .form-container, .notes-container {
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .form-container h2, .notes-container h2 {
+      font-family: 'Barlow Semi Condensed', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+    }
+
+    .form-container input[type="text"],
+    .form-container textarea,
+    .form-container input[type="file"],
+    .form-container select {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+      border: none;
+      background: #f8e9f4;
+      color: #542c69;
+    }
+
+    .form-container textarea {
+      height: 200px;
+    }
+
+    .form-container button {
+      background-color: #d739bb;
+      color: #fff;
+      padding: 12px 55px;
+      border-radius: 20px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+
+    .form-container button:hover {
+      background-color: #a238b8;
+      transform: scale(1.05);
+    }
+
+    .notes-container ul {
+      list-style: disc;
+      padding-left: 20px;
+    }
+
+    .flashcard-container {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    .flashcard {
+      background-color: transparent;
+      width: 100%;
+      height: 250px;
+      perspective: 1000px;
+      margin-bottom: 30px;
+    }
+
+    .flashcard-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border-radius: 15px;
+    }
+
+    .flashcard-front,
+    .flashcard-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      font-size: 18px;
+      border-radius: 15px;
+      overflow: auto;
+    }
+
+    .flashcard-front {
+      background: linear-gradient(135deg, #dfe9f3, #ffffff);
+      color: #1a1a1a; /* dark text for light background */
+    }
+
+    .flashcard-back {
+      background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+      color: #ffffff;
+      transform: rotateY(180deg);
+    }
+
+    .flashcard.flipped .flashcard-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-button {
+      display: block;
+      margin: 10px auto;
+      padding: 8px 20px;
+      background-color: #d739bb;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    .flip-button:hover {
+      background-color: #a238b8;
+    }
+
+    .download-btn {
+      background-color: #28a745;
+      color: white;
+      padding: 12px 55px;
+      border-radius: 20px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 10px;
+    }
+
+    .download-btn:hover {
+      background-color: #218838;
+      transform: scale(1.05);
+    }
+
+    .error {
+      color: #ff4d4d;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+
+    .empty-state {
+      color: #333;
+      text-align: center;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: black;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1;
+      border-radius: 5px;
+      right: -50px;
+    }
+
+    .dropdown-content a {
+      color: #000000;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      font-size: 1rem;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #f50087;
+      color: black;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    /* Thin scrollbar for WebKit browsers */
+    ::-webkit-scrollbar {
+        width: 8px;               /* For vertical scrollbar */
+        height: 8px;              /* For horizontal scrollbar */
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;  /* Optional: background of the track */
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.4);  /* Scrollbar color */
+        border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main-container">
+    <header>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="{{ url_for('mainpage') }}">Home</a></li>
+          <li><a href="{{ url_for('view_notes') }}">Notes</a></li>
+          <li><a href="{{ url_for('view_flashcards') }}">FlashCards</a></li>
+          <li><a href="{{ url_for('quiz') }}">Quiz</a></li>
+          {% if 'user_id' in session %}
+          <li class="dropdown">
+            <a href="#" class="dropbtn">Profile</a>
+            <div class="dropdown-content">
+              <a href="{{ url_for('dashboard') }}">Dashboard</a>
+              <a href="{{ url_for('logout') }}">Logout</a>
+            </div>
+          </li>
+          {% else %}
+          <li><a href="{{ url_for('login') }}">Login</a></li>
+          {% endif %}
+        </ul>
+      </nav>
+    </header>
+
+    <div class="content-container">
+      <h1 class="title">Generate Study Notes</h1>
+
+      <div class="form-container">
+        <h2>Input Study Material</h2>
+        <form method="POST" action="{{ url_for('generate_notes') }}" enctype="multipart/form-data">
+          <label><input type="radio" name="input_option" value="text" checked onclick="toggleInput('text')"> Enter Text</label>
+          <label><input type="radio" name="input_option" value="file" onclick="toggleInput('file')"> Upload File (TXT or PDF)</label>
+
+          <textarea name="input_text" id="input_text" placeholder="Paste your study material here..."></textarea>
+          <input type="file" name="file" id="file_input" accept=".txt,.pdf" style="display: none;" />
+
+          <h2>Customize</h2>
+          <label>Summary Length (words):
+            <select name="length">
+              <option value="100">100</option>
+              <option value="150" selected>150</option>
+              <option value="200">200</option>
+              <option value="300">300</option>
+              <option value="500">500</option>
+            </select>
+          </label>
+          <label><input type="checkbox" name="include_questions" checked> Include review questions and flashcards</label>
+
+          <input type="hidden" name="_method" value="POST" />
+          <button type="submit">Generate Notes</button>
+          <button type="button" onclick="window.location.href='{{ url_for('clear_notes') }}'">Clear Notes</button>
+        </form>
+      </div>
+
+      {% if error %}
+        <div class="error">{{ error }}</div>
+      {% endif %}
+
+      {% if notes_data.summary and notes_data.summary|length > 0 %}
+      <div class="notes-container">
+        <h2>Study Notes</h2>
+
+        <h3>Summary</h3>
+        <p>{{ notes_data.summary }}</p>
+
+        <h3>Key Points</h3>
+        <ul>
+          {% for point in notes_data.key_points %}
+          <li>{{ point }}</li>
+          {% endfor %}
+        </ul>
+
+        <h3>Keywords</h3>
+        <ul>
+          {% for keyword in notes_data.keywords %}
+          <li>{{ keyword }}</li>
+          {% endfor %}
+        </ul>
+
+        {% if notes_data.questions %}
+        <h3 id="questions">Review Questions</h3>
+        <ul>
+          {% for q in notes_data.questions %}
+          <li><strong>{{ q.question }}</strong><p>Answer: {{ q.answer }}</p></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+
+        <a href="{{ url_for('download_notes') }}" class="download-btn">Download Notes</a>
+      </div>
+
+      {% if notes_data.flashcards and notes_data.flashcards|length > 0 %}
+      <div class="flashcard-container" id="flashcards">
+        <h2>Your Flashcards</h2>
+
+        {% for card in notes_data.flashcards %}
+        <h3>Flashcard {{ loop.index }}</h3>
+        <div class="flashcard" id="flashcard-{{ loop.index }}">
+          <div class="flashcard-inner">
+            <div class="flashcard-front">{{ card.front }}</div>
+            <div class="flashcard-back">{{ card.back }}</div>
+          </div>
+        </div>
+        <button class="flip-button" onclick="document.getElementById('flashcard-{{ loop.index }}').classList.toggle('flipped');">
+          Flip
+        </button>
+        {% endfor %}
+
+        <a href="{{ url_for('download_flashcards') }}" class="download-btn">Download Flashcards (CSV)</a>
+      </div>
+      {% endif %}
+
+      {% else %}
+      <div class="empty-state">No notes generated yet. Enter text or upload a file and click "Generate Notes" to start!</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    function toggleInput(option) {
+      document.getElementById('input_text').style.display = option === 'text' ? 'block' : 'none';
+      document.getElementById('file_input').style.display = option === 'file' ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      toggleInput('text');
+    });
+  </script>
+</body>
+</html>
